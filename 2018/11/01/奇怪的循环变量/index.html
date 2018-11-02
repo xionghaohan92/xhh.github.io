@@ -371,7 +371,7 @@
                   <i class="fa fa-comment-o"></i>
                 </span>
                 <a href="/2018/11/01/奇怪的循环变量/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/11/01/奇怪的循环变量/" itemprop="commentCount"></span>
+                  <span class="post-comments-count valine-comment-count" data-xid="/2018/11/01/奇怪的循环变量/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -457,14 +457,7 @@
 
   
     <div class="comments" id="comments">
-      <div id="disqus_thread">
-        <noscript>
-          Please enable JavaScript to view the
-          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
-        </noscript>
-      </div>
     </div>
-
   
 
 
@@ -715,26 +708,6 @@
 
   
 
-    
-      <script id="dsq-count-scr" src="https://xionghaohan92.disqus.com/count.js" async></script>
-    
-
-    
-      <script type="text/javascript">
-        var disqus_config = function () {
-          this.page.url = 'http://yoursite.com/2018/11/01/奇怪的循环变量/';
-          this.page.identifier = '2018/11/01/奇怪的循环变量/';
-          this.page.title = '奇怪的循环变量';
-        };
-        var d = document, s = d.createElement('script');
-        s.src = 'https://xionghaohan92.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', '' + +new Date());
-        (d.head || d.body).appendChild(s);
-      </script>
-    
-
-  
-
 
 
 
@@ -750,12 +723,38 @@
 
 
 
+  
 
 
 
 
 
 
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: 'JdApDO8WON8ccdGRNvN1OMIN-gzGzoHsz',
+        appKey: 'XL7Koe3RY36Dz6BfJQG1elNN',
+        placeholder: 'Just go go',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
 
 
 
