@@ -79,18 +79,18 @@
 
 
 
-<meta name="description" content="问题描述有问题如下：12345678910&amp;lt;?php$arr = [1,2,3];foreach ($arr as &amp;amp;$v)&amp;#123;&amp;#125;foreach ($arr as $v)&amp;#123;     &amp;#125;print_r($arr); 结果输出了：123456Array(    [0] =&amp;gt; 1    [1] =&amp;gt; 2    [2] =&amp;gt; 2)">
+<meta name="description" content="php中循环引出的问题">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
 <meta property="og:title" content="奇怪的循环变量">
 <meta property="og:url" content="http://yoursite.com/2018/11/01/奇怪的循环变量/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="问题描述有问题如下：12345678910&amp;lt;?php$arr = [1,2,3];foreach ($arr as &amp;amp;$v)&amp;#123;&amp;#125;foreach ($arr as $v)&amp;#123;     &amp;#125;print_r($arr); 结果输出了：123456Array(    [0] =&amp;gt; 1    [1] =&amp;gt; 2    [2] =&amp;gt; 2)">
+<meta property="og:description" content="php中循环引出的问题">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-02T10:06:42.000Z">
+<meta property="og:updated_time" content="2018-11-02T10:09:53.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="奇怪的循环变量">
-<meta name="twitter:description" content="问题描述有问题如下：12345678910&amp;lt;?php$arr = [1,2,3];foreach ($arr as &amp;amp;$v)&amp;#123;&amp;#125;foreach ($arr as $v)&amp;#123;     &amp;#125;print_r($arr); 结果输出了：123456Array(    [0] =&amp;gt; 1    [1] =&amp;gt; 2    [2] =&amp;gt; 2)">
+<meta name="twitter:description" content="php中循环引出的问题">
 
 
 
@@ -400,9 +400,9 @@
       
 
       
-        <h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>有问题如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> &amp;$v)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> $v)</span><br><span class="line">&#123;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br><span class="line">print_r($arr);</span><br></pre></td></tr></table></figure></p>
+        <p>php中循环引出的问题<br><a id="more"></a></p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>有问题如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> &amp;$v)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> $v)</span><br><span class="line">&#123;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br><span class="line">print_r($arr);</span><br></pre></td></tr></table></figure></p>
 <p>结果输出了：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Array</span></span><br><span class="line">(</span><br><span class="line">    [<span class="number">0</span>] =&gt; <span class="number">1</span></span><br><span class="line">    [<span class="number">1</span>] =&gt; <span class="number">2</span></span><br><span class="line">    [<span class="number">2</span>] =&gt; <span class="number">2</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
-<a id="more"></a>
 <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>这里的v在第一次循环结束时并没有释放，循环结束后v依然指向arr的最后一个元素，而不是第一个元素。且由于是引用赋值，改变v的值是可以影响arr数组的，为之后的”bug”埋下了伏笔。换句话说，代码等价于:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> &amp;$v)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> &amp;$v)</span><br><span class="line">&#123;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br><span class="line">print_r($arr);</span><br></pre></td></tr></table></figure></p>
 <p>第二次循环开始了，循环时会依次把遍历中的数组元素赋给v,注意这里v依然指向数组的最后一个元素，三次赋值的结果如下：</p>
 <ul>
