@@ -79,18 +79,21 @@
 
 
 
-<meta name="description" content="php中循环引出的问题">
+<meta name="description" content="简介php7底层数组实现中，为了节省空间，将数组分为了哈希数组和packed数组。简单来说，pacekd数组有以下特征：">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
-<meta property="og:title" content="奇怪的循环变量">
-<meta property="og:url" content="http://xionghaohan92.github.io/2018/05/09/奇怪的循环变量/index.html">
+<meta property="og:title" content="packed数组">
+<meta property="og:url" content="http://xionghaohan92.github.io/2019/11/22/packed数组/index.html">
 <meta property="og:site_name" content="野马之吹">
-<meta property="og:description" content="php中循环引出的问题">
+<meta property="og:description" content="简介php7底层数组实现中，为了节省空间，将数组分为了哈希数组和packed数组。简单来说，pacekd数组有以下特征：">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-02T10:44:06.000Z">
+<meta property="og:image" content="http://pimwvecu3.bkt.clouddn.com/image2018-3-11%2012_28_44.png">
+<meta property="og:image" content="http://pimwvecu3.bkt.clouddn.com/%E6%95%B0%E7%BB%84%E7%9A%84%E6%8F%92%E5%85%A5%E6%9B%B4%E6%96%B0%E8%A7%A6%E5%8F%91packed%E8%BD%AC%E5%93%88%E5%B8%8C.jpg">
+<meta property="og:updated_time" content="2018-11-23T08:38:10.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="奇怪的循环变量">
-<meta name="twitter:description" content="php中循环引出的问题">
+<meta name="twitter:title" content="packed数组">
+<meta name="twitter:description" content="简介php7底层数组实现中，为了节省空间，将数组分为了哈希数组和packed数组。简单来说，pacekd数组有以下特征：">
+<meta name="twitter:image" content="http://pimwvecu3.bkt.clouddn.com/image2018-3-11%2012_28_44.png">
 
 
 
@@ -120,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="http://xionghaohan92.github.io/2018/05/09/奇怪的循环变量/">
+  <link rel="canonical" href="http://xionghaohan92.github.io/2019/11/22/packed数组/">
 
 
 
 
 
-  <title>奇怪的循环变量 | 野马之吹</title>
+  <title>packed数组 | 野马之吹</title>
   
 
 
@@ -295,7 +298,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://xionghaohan92.github.io/2018/05/09/奇怪的循环变量/">
+    <link itemprop="mainEntityOfPage" href="http://xionghaohan92.github.io/2019/11/22/packed数组/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="野马之吹">
@@ -312,7 +315,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">奇怪的循环变量</h1>
+          <h1 class="post-title" itemprop="name headline">packed数组</h1>
         
 
         <div class="post-meta">
@@ -324,8 +327,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-09T19:29:33+08:00">
-                2018-05-09
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-22T19:29:33+08:00">
+                2019-11-22
               </time>
             
 
@@ -365,8 +368,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/05/09/奇怪的循环变量/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2018/05/09/奇怪的循环变量/" itemprop="commentCount"></span>
+                <a href="/2019/11/22/packed数组/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/11/22/packed数组/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -394,17 +397,42 @@
       
 
       
-        <p>php中循环引出的问题<br><a id="more"></a></p>
-<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>有问题如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> &amp;$v)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> $v)</span><br><span class="line">&#123;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br><span class="line">print_r($arr);</span><br></pre></td></tr></table></figure></p>
-<p>结果输出了：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">Array</span></span><br><span class="line">(</span><br><span class="line">    [<span class="number">0</span>] =&gt; <span class="number">1</span></span><br><span class="line">    [<span class="number">1</span>] =&gt; <span class="number">2</span></span><br><span class="line">    [<span class="number">2</span>] =&gt; <span class="number">2</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>这里的v在第一次循环结束时并没有释放，循环结束后v依然指向arr的最后一个元素，而不是第一个元素。且由于是引用赋值，改变v的值是可以影响arr数组的，为之后的”bug”埋下了伏笔。换句话说，代码等价于:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$arr = [<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>];</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> &amp;$v)</span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">foreach</span> ($arr <span class="keyword">as</span> &amp;$v)</span><br><span class="line">&#123;</span><br><span class="line">     </span><br><span class="line">&#125;</span><br><span class="line">print_r($arr);</span><br></pre></td></tr></table></figure></p>
-<p>第二次循环开始了，循环时会依次把遍历中的数组元素赋给v,注意这里v依然指向数组的最后一个元素，三次赋值的结果如下：</p>
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>php7底层数组实现中，为了节省空间，将数组分为了哈希数组和packed数组。简单来说，pacekd数组有以下特征：<a id="more"></a></p>
 <ul>
-<li>$v&lt;-1,arr开始为[1,2,3]，赋值后arr为[1,2,1]</li>
-<li>$v&lt;-2,arr开始为[1,2,1]，赋值后arr为[1,2,2]</li>
-<li>$v&lt;-2,arr开始为[1,2,2]，赋值后arr为[1,2,2]</li>
+<li>key全为数字</li>
+<li>插入顺序需按key递增</li>
 </ul>
-<h2 id="根本原因"><a href="#根本原因" class="headerlink" title="根本原因"></a>根本原因</h2><p>php中没有把循环看作一个独立的空间，在循环过程中新声明的变量就是全局变量，循环结束后变量并没有被释放。</p>
+<p>但这并不是packed数组的真正定义。packed数组在一定情况下会转化为哈希数组。<strong>什么情况下会触发转化呢？</strong>转化的判断涉及还涉及扩容相关的计算，需要从源码处确认。</p>
+<h2 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h2><p>在区分哈希数组和packed数组之前，我们先复习下php7数组的基本结构。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">zend_array</span> &#123;</span></span><br><span class="line">	zend_refcounted_h gc;</span><br><span class="line">	<span class="keyword">union</span> &#123;</span><br><span class="line">		<span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">			ZEND_ENDIAN_LOHI_4(</span><br><span class="line">				zend_uchar    flags,</span><br><span class="line">				zend_uchar    nApplyCount,</span><br><span class="line">				zend_uchar    nIteratorsCount,</span><br><span class="line">				zend_uchar    consistency)</span><br><span class="line">		&#125; v;</span><br><span class="line">		<span class="keyword">uint32_t</span> flags;</span><br><span class="line">	&#125; u;</span><br><span class="line">	<span class="keyword">uint32_t</span>          nTableMask;</span><br><span class="line">	Bucket           *arData;</span><br><span class="line">	<span class="keyword">uint32_t</span>          nNumUsed;</span><br><span class="line">	<span class="keyword">uint32_t</span>          nNumOfElements;</span><br><span class="line">	<span class="keyword">uint32_t</span>          nTableSize;</span><br><span class="line">	<span class="keyword">uint32_t</span>          nInternalPointer;</span><br><span class="line">	zend_long         nNextFreeElement;</span><br><span class="line">	<span class="keyword">dtor_func_t</span>       pDestructor;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>nTableMask:散列函数映射存储元素在arData中的下标</li>
+<li>*arData:存储数组元素，每个元素结构统一为Bucket</li>
+<li>nNumUsed:当前数组使用的bucket数，注意nNumUsed代表的是当前使用的bucket数，是始终递增的。例如$a[1=&gt;”11”,6=&gt;”66”],此时nNumUsed为6，不为2。</li>
+<li>nNumOfElements:数组中有效元素的数量</li>
+<li>nTableSize:数组总容量</li>
+<li>nInternalPointer://</li>
+<li>nNextFreeElement:下一个自动确定的数值索引。例如对一个空数组$a，令$a[]=1,这个值则有0变为1</li>
+<li>pDestructor:当删除或覆盖数组中某个元素时，如果提供了某函数句柄，则在删除或覆盖元素后调用某函数</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">Bucket</span> &#123;</span></span><br><span class="line">	zval              val;              <span class="comment">//value 例如$arr[a]=1,此处即存1</span></span><br><span class="line">	zend_ulong        h;                <span class="comment">//索引值</span></span><br><span class="line">	zend_string      *key;              <span class="comment">//key 例如$arr[a]=1,此处即存a</span></span><br><span class="line">&#125; Bucket;</span><br></pre></td></tr></table></figure>
+<h3 id="逻辑索引"><a href="#逻辑索引" class="headerlink" title="逻辑索引"></a>逻辑索引</h3><p>为了保证数组的”有序“（这里的有序是指记录插入顺序。即遍历数组的时候,遍历元素的顺序应该是和插入顺序是一致的,而不是像普通字典一样是随机的）。php7在中HashTable和bucket中间实现了一个逻辑上的索引表，保障了有序。具体来说，插入新元素时，始终在 bucket 数组的最后一个有效元素的后面插入，以此保证数组有序。<br><img src="http://pimwvecu3.bkt.clouddn.com/image2018-3-11%2012_28_44.png" alt=""></p>
+<center>图片摘自《php7内核剖析》</center>
+
+<p>头部的逻辑索引保证了php数组的顺序，但也带来了不必要的开销。数组下标从0开始的普通数组，逻辑索引并没有起到太大用处，为了存储逻辑索引，还需要消耗n个字节的内存（其中n为数组大小）。故对于这一类数组，php7取消了逻辑索引（但仍然预留了两字节，意义不明），这便是packed数组。packed数组与哈希数组除逻辑索引外，其余结构完全相同。</p>
+<h3 id="packed数组的判断条件"><a href="#packed数组的判断条件" class="headerlink" title="packed数组的判断条件"></a>packed数组的判断条件</h3><p>packed数组的设计对顶层用户透明，但我们可从代码中确认它的详细定义。以下是插入和更新数组时的函数源码：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, zend_ulong h, zval *pData, <span class="keyword">uint32_t</span> flag ZEND_FILE_LINE_DC)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">uint32_t</span> nIndex;</span><br><span class="line">	<span class="keyword">uint32_t</span> idx;</span><br><span class="line">	Bucket *p;</span><br><span class="line"></span><br><span class="line">	IS_CONSISTENT(ht);</span><br><span class="line">	HT_ASSERT(GC_REFCOUNT(ht) == <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (UNEXPECTED(!(ht-&gt;u.flags &amp; HASH_FLAG_INITIALIZED))) &#123;</span><br><span class="line">		CHECK_INIT(ht, h &lt; ht-&gt;nTableSize);</span><br><span class="line">		<span class="keyword">if</span> (h &lt; ht-&gt;nTableSize) &#123;</span><br><span class="line">			p = ht-&gt;arData + h;</span><br><span class="line">			<span class="keyword">goto</span> add_to_packed;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">goto</span> add_to_hash;</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (ht-&gt;u.flags &amp; HASH_FLAG_PACKED) &#123;</span><br><span class="line">		<span class="keyword">if</span> (h &lt; ht-&gt;nNumUsed) &#123;<span class="comment">//h小于当前已有的元素数量</span></span><br><span class="line">			p = ht-&gt;arData + h;</span><br><span class="line">			<span class="keyword">if</span> (Z_TYPE(p-&gt;val) != IS_UNDEF) &#123;<span class="comment">//不为空</span></span><br><span class="line">				<span class="keyword">if</span> (flag &amp; HASH_ADD) &#123;</span><br><span class="line">					<span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">if</span> (ht-&gt;pDestructor) &#123;</span><br><span class="line">					ht-&gt;pDestructor(&amp;p-&gt;val);</span><br><span class="line">				&#125;</span><br><span class="line">				ZVAL_COPY_VALUE(&amp;p-&gt;val, pData);</span><br><span class="line">				<span class="keyword">if</span> ((zend_long)h &gt;= (zend_long)ht-&gt;nNextFreeElement) &#123;</span><br><span class="line">					ht-&gt;nNextFreeElement = h &lt; ZEND_LONG_MAX ? h + <span class="number">1</span> : ZEND_LONG_MAX;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">return</span> &amp;p-&gt;val;</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123; <span class="comment">/* we have to keep the order :( 否则触发转化*/</span></span><br><span class="line">				<span class="keyword">goto</span> convert_to_hash;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (EXPECTED(h &lt; ht-&gt;nTableSize)) &#123;</span><br><span class="line">			p = ht-&gt;arData + h;</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> ((h &gt;&gt; <span class="number">1</span>) &lt; ht-&gt;nTableSize &amp;&amp;</span><br><span class="line">		           (ht-&gt;nTableSize &gt;&gt; <span class="number">1</span>) &lt; ht-&gt;nNumOfElements) &#123;<span class="comment">//此处判断扩容条件，判断失败则触发转化</span></span><br><span class="line">			zend_hash_packed_grow(ht);</span><br><span class="line">			p = ht-&gt;arData + h;</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">goto</span> convert_to_hash;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">add_to_packed:</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">convert_to_hash:</span><br><span class="line">...</span><br><span class="line"></span><br><span class="line">add_to_hash:</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>触发逻辑如图所示：<br><img src="http://pimwvecu3.bkt.clouddn.com/%E6%95%B0%E7%BB%84%E7%9A%84%E6%8F%92%E5%85%A5%E6%9B%B4%E6%96%B0%E8%A7%A6%E5%8F%91packed%E8%BD%AC%E5%93%88%E5%B8%8C.jpg" alt=""></p>
+<center>packed数组转哈希数组的触发逻辑</center>
+
+<p>扩容需满足的条件如下：当前容量扩大两倍能包含h，并且当前数组bucket已使用一半以上。<br>至此，我们可以回答什么情况下packed数组会转化成哈希数组。（以下新增元素的key简称为h,数组当前已用到的最大bucket下标简称为nNumUsed，数组总容量简称为size。）</p>
+<ul>
+<li>h大于size，且未达到扩容标准时，触发转化</li>
+<li>h小于nNumUsed，且该bucket位上为IS_UNDEFIND时，触发转化。ps:数组初始化时，分配但未使用的bucket属性都为IS_UNDEFIND</li>
+</ul>
+<p>case1:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$arr[<span class="number">1</span>]=&gt;<span class="number">11</span>;</span><br><span class="line">$arr[<span class="number">7</span>]=&gt;<span class="number">77</span>;</span><br><span class="line">$arr[<span class="number">9</span>]=&gt;<span class="number">99</span>;</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure></p>
+<p>最终$arr是哈希数组。因为9(h)&gt;7(nNumUsed),且不满足扩容条件,触发转化。</p>
+<p>case2:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">$arr[<span class="number">6</span>]=&gt;<span class="number">66</span>;</span><br><span class="line">$arr[<span class="number">7</span>]=&gt;<span class="number">77</span>;</span><br><span class="line">$arr[<span class="number">1</span>]=&gt;<span class="number">11</span>;</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure></p>
+<p>最终$arr是哈希数组。因为1(h)&lt;7(nNumUsed),且bucket[1]此时为IS_UNDEFINED,触发转化。</p>
 
       
     </div>
@@ -435,8 +463,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/03/28/初识php-fpm/" rel="next" title="初识php-fpm">
-                <i class="fa fa-chevron-left"></i> 初识php-fpm
+              <a href="/2018/05/09/奇怪的循环变量/" rel="next" title="奇怪的循环变量">
+                <i class="fa fa-chevron-left"></i> 奇怪的循环变量
               </a>
             
           </div>
@@ -444,10 +472,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/11/22/packed数组/" rel="prev" title="packed数组">
-                packed数组 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -584,7 +608,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#根本原因"><span class="nav-number">3.</span> <span class="nav-text">根本原因</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据结构"><span class="nav-number">2.</span> <span class="nav-text">数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#逻辑索引"><span class="nav-number">2.1.</span> <span class="nav-text">逻辑索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#packed数组的判断条件"><span class="nav-number">2.2.</span> <span class="nav-text">packed数组的判断条件</span></a></li></ol></li></ol></div>
             
 
           </div>
