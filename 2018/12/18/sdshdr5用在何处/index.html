@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="问题在redis5中，执行以下命令，key和value最终是用哪种sds存放的？ 1&amp;gt; set a ttt #sds基础回顾 从redis3.2开始，sds就有了5种类型，5种类型分别存放不同大小的字符串。在创建字符串时，sds会根据字符串的长度选择不同的类型。最终由sdsnewlen函数创建字符串： 123456789101112131415161718192021222324252627">
+<meta name="description" content="问题在redis5中，执行以下命令，key和value最终是用哪种sds存放？">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
 <meta property="og:title" content="sdshdr5用在何处？">
 <meta property="og:url" content="http://xionghaohan92.github.io/2018/12/18/sdshdr5用在何处/index.html">
 <meta property="og:site_name" content="野马之吹">
-<meta property="og:description" content="问题在redis5中，执行以下命令，key和value最终是用哪种sds存放的？ 1&amp;gt; set a ttt #sds基础回顾 从redis3.2开始，sds就有了5种类型，5种类型分别存放不同大小的字符串。在创建字符串时，sds会根据字符串的长度选择不同的类型。最终由sdsnewlen函数创建字符串： 123456789101112131415161718192021222324252627">
+<meta property="og:description" content="问题在redis5中，执行以下命令，key和value最终是用哪种sds存放？">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://raw.githubusercontent.com/xionghaohan92/ImageBed/master/DingTalk20181217192313.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/xionghaohan92/ImageBed/master/1.png">
-<meta property="og:updated_time" content="2018-12-18T02:47:14.000Z">
+<meta property="og:updated_time" content="2018-12-18T02:59:04.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="sdshdr5用在何处？">
-<meta name="twitter:description" content="问题在redis5中，执行以下命令，key和value最终是用哪种sds存放的？ 1&amp;gt; set a ttt #sds基础回顾 从redis3.2开始，sds就有了5种类型，5种类型分别存放不同大小的字符串。在创建字符串时，sds会根据字符串的长度选择不同的类型。最终由sdsnewlen函数创建字符串： 123456789101112131415161718192021222324252627">
+<meta name="twitter:description" content="问题在redis5中，执行以下命令，key和value最终是用哪种sds存放？">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/xionghaohan92/ImageBed/master/DingTalk20181217192313.png">
 
 
@@ -397,14 +397,13 @@
       
 
       
-        <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>在redis5中，执行以下命令，key和value最终是用哪种sds存放的？</p>
+        <h1 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h1><p>在redis5中，执行以下命令，key和value最终是用哪种sds存放？</p>
+<a id="more"></a>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; <span class="built_in">set</span> a ttt</span><br></pre></td></tr></table></figure>
-<p>#sds基础回顾</p>
-<p>从redis3.2开始，sds就有了5种类型，5种类型分别存放不同大小的字符串。在创建字符串时，sds会根据字符串的长度选择不同的类型。最终由sdsnewlen函数创建字符串：</p>
+<h1 id="sds基础回顾"><a href="#sds基础回顾" class="headerlink" title="sds基础回顾"></a>sds基础回顾</h1><p>从redis3.2开始，sds就有了5种类型，5种类型分别存放不同大小的字符串。在创建字符串时，sds会根据字符串的长度选择不同的类型。最终由sdsnewlen函数创建字符串：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">sds <span class="title">sdsnewlen</span><span class="params">(<span class="keyword">const</span> <span class="keyword">void</span> *init, <span class="keyword">size_t</span> initlen)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">void</span> *sh;</span><br><span class="line">    sds s;</span><br><span class="line">    <span class="keyword">char</span> type = sdsReqType(initlen);</span><br><span class="line">    <span class="keyword">if</span> (type == SDS_TYPE_5 &amp;&amp; initlen == <span class="number">0</span>) type = SDS_TYPE_8;<span class="comment">//为空时强制用sdshdr8</span></span><br><span class="line">    <span class="keyword">int</span> hdrlen = sdsHdrSize(type);</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> *fp; <span class="comment">/* flags pointer. */</span></span><br><span class="line"></span><br><span class="line">    sh = s_malloc(hdrlen+initlen+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (init==SDS_NOINIT)</span><br><span class="line">        init = <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (!init)</span><br><span class="line">        <span class="built_in">memset</span>(sh, <span class="number">0</span>, hdrlen+initlen+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (sh == <span class="literal">NULL</span>) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    s = (<span class="keyword">char</span>*)sh+hdrlen;</span><br><span class="line">    fp = ((<span class="keyword">unsigned</span> <span class="keyword">char</span>*)s)<span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">switch</span>(type) &#123;</span><br><span class="line">        <span class="keyword">case</span> SDS_TYPE_5: &#123;</span><br><span class="line">            *fp = type | (initlen &lt;&lt; SDS_TYPE_BITS);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> SDS_TYPE_8: &#123;</span><br><span class="line">            SDS_HDR_VAR(<span class="number">8</span>,s);</span><br><span class="line">            sh-&gt;len = initlen;</span><br><span class="line">            sh-&gt;alloc = initlen;</span><br><span class="line">            *fp = type;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> SDS_TYPE_16: &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> SDS_TYPE_32: &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> SDS_TYPE_64: &#123;</span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (initlen &amp;&amp; init)</span><br><span class="line">        <span class="built_in">memcpy</span>(s, init, initlen);</span><br><span class="line">    s[initlen] = <span class="string">'\0'</span>;</span><br><span class="line">    <span class="keyword">return</span> s;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>除了创建空字符串时会强转为SDS_TYPE_8外，没有什么其它特别之处了。</p>
-<p>#gdb结果</p>
-<p>问题中的key和value都是长度短于32的字符串，似乎应该都用sdshdr5来存。但gdb打印后发现，key确实是用sdshdr5存储的，但value却是用sdshdr8存储的。<br>在getCommand函数处打断点，打印c-db-&gt;dict中的相关内容：</p>
+<h1 id="gdb结果"><a href="#gdb结果" class="headerlink" title="gdb结果"></a>gdb结果</h1><p>问题中的key和value都是长度短于32的字符串，似乎应该都用sdshdr5来存。但gdb打印后发现，key确实是用sdshdr5存储的，但value却是用sdshdr8存储的。<br>在getCommand函数处打断点，打印c-db-&gt;dict中的相关内容：</p>
 <p><img src="https://raw.githubusercontent.com/xionghaohan92/ImageBed/master/DingTalk20181217192313.png" alt=""></p>
 <p>分别打印key和val的值，其中key是sds，val是robj。结果如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p	(sds)0x7f09d2009830</span><br><span class="line"><span class="variable">$117</span> = 0x7f09d2009830 <span class="string">"\ba"</span></span><br><span class="line">(gdb) p *(robj*)0x7f09d2029830</span><br><span class="line"><span class="variable">$118</span> = &#123;<span class="built_in">type</span> = 0, encoding = 8,	lru = 1536715, refcount = 1, ptr = 0x7f09d2029843&#125;</span><br><span class="line">(gdb) p	(sds)0x7f09d2029842</span><br><span class="line"><span class="variable">$119</span> = 0x7f09d2029842 <span class="string">"\001ttt"</span></span><br></pre></td></tr></table></figure>
@@ -419,23 +418,23 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setCommand</span><span class="params">(client *c)</span> </span>&#123;</span><br><span class="line">	...</span><br><span class="line">    c-&gt;argv[<span class="number">2</span>] = tryObjectEncoding(c-&gt;argv[<span class="number">2</span>]);</span><br><span class="line">    setGenericCommand(c,flags,c-&gt;argv[<span class="number">1</span>],c-&gt;argv[<span class="number">2</span>],expire,unit,<span class="literal">NULL</span>,<span class="literal">NULL</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>最终调setGenericCommand，c-&gt;argv[1],c-&gt;argv[2]是两个robj,存放着key和value,打印结果如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(gdb) p (sds)((*c-&gt;argv[1])-&gt;ptr-1)</span><br><span class="line"><span class="variable">$125</span> = 0x7f09d2029aca <span class="string">"\001a"</span></span><br><span class="line">(gdb) p (sds)((*c-&gt;argv[2])-&gt;ptr-1)</span><br><span class="line"><span class="variable">$126</span> = 0x7f09d202988a <span class="string">"\001ttt"</span></span><br></pre></td></tr></table></figure>
-<p>可以看到，两个robj底层的sds_type都是sdshdr8。为什么是两个sdshdr8呢？argv应该是在命令解析的时候生成的，继续跟源码。命令解析的源头在readQueryFromClient,从readQueryFromClient一直往下跟，调用链如下：</p>
+<p>可以看到，<strong>两个robj底层的sds_type都是sdshdr8</strong>。为什么是两个sdshdr8呢？argv应该是在命令解析的时候生成的，继续跟源码。命令解析的源头在readQueryFromClient,从readQueryFromClient一直往下跟，调用链如下：</p>
 <p><img src="https://raw.githubusercontent.com/xionghaohan92/ImageBed/master/1.png" alt=""></p>
 <p>最终走到了createStringObject：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">robj *<span class="title">createStringObject</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (len &lt;= OBJ_ENCODING_EMBSTR_SIZE_LIMIT)<span class="comment">//OBJ_ENCODING_EMBSTR_SIZE_LIMIT = 44</span></span><br><span class="line">        <span class="keyword">return</span> createEmbeddedStringObject(ptr,len);</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> createRawStringObject(ptr,len);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>redis在解析参数时，根据参数长度选不同的结构。有意思的是，参数长度小于44时，走createEmbeddedStringObject分支,但createEmbeddedStringObject中又强制用sdshdr8来存字符串：</p>
+<p>redis在存储命令参数时，根据参数长度选不同的结构。有意思的是，参数长度小于44时，走createEmbeddedStringObject分支,但createEmbeddedStringObject中又强制用sdshdr8来存字符串：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">robj *<span class="title">createEmbeddedStringObject</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *ptr, <span class="keyword">size_t</span> len)</span> </span>&#123;</span><br><span class="line">    robj *o = zmalloc(<span class="keyword">sizeof</span>(robj)+<span class="keyword">sizeof</span>(struct sdshdr8)+len+<span class="number">1</span>);<span class="comment">//指定sdshdr8</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>而当参数长度大于44时，走一般流程。此时创建的字符串长度既然大于44，更大于32了，自然也不可能用sdshdr5。换而言之，<strong>从clientBuffer中解析出的命令参数，redis统一用大于sdshdr5的结构存，这跟之前gdb的现象是一致的</strong>。<br>那什么时候key变成由sdshdr5存储了呢？回过头继续跟setGenericCommand，调用链如下：</p>
+<p>而当参数长度大于44时，走一般流程。此时创建的字符串长度既然大于44，更大于32了，自然也不可能用sdshdr5。换而言之，<strong>从Buffer中解析出的命令参数，redis统一用大于sdshdr5的结构存，这跟之前gdb的现象是一致的</strong>。<br>那什么时候key变回由sdshdr5存储了呢？回过头继续跟setGenericCommand，调用链如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setGenericCommand--&gt;setKey--&gt;dbAdd</span><br></pre></td></tr></table></figure>
 <p>在dbAdd函数中，可以看到，redis对待存入的key做了一次复制，<strong>正是这次复制将key由之前的sdshdr8转成了sdshdr5</strong>:</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">dbAdd</span><span class="params">(redisDb *db, robj *key, robj *val)</span> </span>&#123;</span><br><span class="line">    sds copy = sdsdup(key-&gt;ptr);</span><br><span class="line">    <span class="keyword">int</span> retval = dictAdd(db-&gt;dict, copy, val);</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>sdsdup复制只看字符串内容，根据字符串内容创建新的sds,由于key-&gt;ptr指向的字符互串是”a”,故copy这个robj底层是个sdshdr5。最终调用dictAdd时，键的robj底层是sdshdr5,而值的robj底层是sdshdr8。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>最终可以确认，长度小于32的键值对，键的底层是sdshdr5,而值的robj底层是sdshdr8。</p>
 <ul>
-<li><p>Q1:为什么redis这么设计？</p>
-<p>个人猜想是键不更新而值会更新，故键用尽可能小的结构存，而值更新会引起扩容，索性直接用大些的结构存。</p>
+<li><p>Q1:为什么用sdshdr5存key可以，存value不行？</p>
+<p>个人猜想是键不更新而值会更新，故键用尽可能小的结构存；值更新会引起扩容，索性直接用大些的结构存。</p>
 </li>
-<li><p>为什么从解析参数时，redis又抛弃了小的sdshdr5？</p>
+<li><p>Q2:为什么解析参数时，redis又抛弃了小的sdshdr5？</p>
 <p>个人猜想是为了编码方便。不同命令的参数个数都不相同，一开始分不清哪个位置是key哪个位置是value，索性统一处理，在具体场景下，再单独优化。</p>
 </li>
 </ul>
@@ -469,8 +468,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/05/09/奇怪的循环变量/" rel="next" title="奇怪的循环变量">
-                <i class="fa fa-chevron-left"></i> 奇怪的循环变量
+              <a href="/2018/11/22/packed数组/" rel="next" title="packed数组">
+                <i class="fa fa-chevron-left"></i> packed数组
               </a>
             
           </div>
@@ -478,10 +477,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/11/22/packed数组/" rel="prev" title="packed数组">
-                packed数组 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -618,7 +613,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#set命令流程"><span class="nav-number">2.</span> <span class="nav-text">set命令流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#问题"><span class="nav-number">1.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#sds基础回顾"><span class="nav-number">2.</span> <span class="nav-text">sds基础回顾</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#gdb结果"><span class="nav-number">3.</span> <span class="nav-text">gdb结果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#set命令流程"><span class="nav-number">4.</span> <span class="nav-text">set命令流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
